@@ -1,7 +1,7 @@
 {
-  "name": "sweepline",
-  "version": "0.1.0",
-  "description": "Detect self-intersecting polygons in Javascript. An implementation of the Bentley–Ottmann sweep line algorithm for detecting crossings in a set of line segments.",
+  "name": "sweepline2",
+  "version": "0.2.0",
+  "description": "Detect self-intersecting polygons in Javascript. An implementation of the Bentley–Ottmann sweep-line algorithm with redblack tree for detecting crossings in a set of line segments.",
   "main": "lib/index.js",
   "directories": {
     "example": "examples",
@@ -12,18 +12,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/calvinmetcalf/sweepline"
+    "url": "https://github.com/e-cloud/sweepline"
   },
   "keywords": [
     "geospatial",
     "intersection"
   ],
-  "author": "Simon Tokumine",
-  "license": "Free",
+  "author": ["Simon Tokumine", "Calvin Metcalf", "Saint Scott"],
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/calvinmetcalf/sweepline/issues"
+    "url": "https://github.com/e-cloud/sweepline/issues"
   },
-  "homepage": "https://github.com/calvinmetcalf/sweepline",
+  "homepage": "https://github.com/e-cloud/sweepline",
   "devDependencies": {
     "mocha": "~1.17.0",
     "chai": "~1.8.1"
