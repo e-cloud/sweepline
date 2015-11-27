@@ -1,6 +1,6 @@
 {
   "name": "sweepline2",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Detect self-intersecting polygons in Javascript. An implementation of the Bentley–Ottmann sweep-line algorithm with redblack tree for detecting crossings in a set of line segments.",
   "main": "lib/index.js",
   "directories": {
