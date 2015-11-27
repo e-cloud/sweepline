@@ -3,9 +3,9 @@ var sl = require('../lib'),
 	Polygon = sl.Polygon,
 	Point = sl.Point,
 	RedBlackTree = sl.RedBlackTree,
-	EventQueue = sl.EventQueue,
 	SweepLine = sl.SweepLine,
 	assert = require('chai').assert;
+
 var TestNumber = function (number) {
 	this.value = number
 };
@@ -14,19 +14,25 @@ TestNumber.prototype.compare = function (test_number) {
 	if (this.value > test_number.value) return 1;
 	if (this.value < test_number.value) return -1;
 	return 0;
-}
+};
+
 describe('sweepline', function () {
 	describe('event queue', function () {
 		it('test can create an EventQueue', function () {
-			var geojson = [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]];
+			var geojson = [
+				[100.0, 0.0],
+				[101.0, 0.0],
+				[101.0, 1.0],
+				[100.0, 1.0]
+			];
 			var points = geojson.map(function (pnt) {
 				return new Point(pnt[0], pnt[1]);
 			});
 			var polygon = new Polygon(points);
-			var event_queue = new EventQueue(polygon)
+			var event_queue = new EventQueue(polygon);
 
 			assert.equal(event_queue.events.length, 8);
-			assert.equal(event_queue.events.length, event_queue.number_of_events);
+			assert.equal(event_queue.events.length, event_queue.numberOfEvents);
 		});
 	});
 	describe('point', function () {
@@ -52,7 +58,7 @@ describe('sweepline', function () {
 			var p1 = new Point(3.0, 3.0);
 			var p2 = new Point(1.0, 3.0);
 
-			assert.ok(p2.is_left(p0, p1) > 0);
+			assert.ok(Point.prototype.isLeft(p0, p1, p2) > 0);
 		});
 
 		it('test right of line', function () {
@@ -60,7 +66,7 @@ describe('sweepline', function () {
 			var p1 = new Point(3.0, 3.0);
 			var p2 = new Point(3.0, 1.0);
 
-			assert.ok(p2.is_left(p0, p1) < 0);
+			assert.ok(Point.prototype.isLeft(p0, p1, p2) < 0);
 		});
 
 		it('test on line', function () {
@@ -68,83 +74,149 @@ describe('sweepline', function () {
 			var p1 = new Point(3.0, 3.0);
 			var p2 = new Point(2.0, 2.0);
 
-			assert.ok(p2.is_left(p0, p1) == 0);
+			assert.ok(Point.prototype.isLeft(p0, p1, p2) == 0);
 		});
 	});
 	describe('polygon', function () {
 		it('test can build a polygon from an array of points', function () {
-			geom = [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]];
-			points = geom.map(function (pnt) {
-				return new Point(pnt[0], pnt[1]);
-			});
-			polygon = new Polygon(points);
+			var geom = [
+					[100.0, 0.0],
+					[101.0, 0.0],
+					[101.0, 1.0],
+					[100.0, 1.0]
+				],
+				points = geom.map(function (pnt) {
+					return new Point(pnt[0], pnt[1]);
+				}),
+				polygon = new Polygon(points);
 
 			assert.equal(polygon.vertices.length, geom.length);
 			assert.equal(polygon.vertices[0].x, geom[0][0]);
 		});
 
-		it('test is polygon simple 1', function () {
+		it('test is polygon simple 1 but last coord is duplicated, so it\'s not valid', function () {
 
 			// note hack on last co-ordinate.
-			var geom = [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.000001, 0.000001]];
+			var geom = [
+				[100.0, 0.0],
+				[101.0, 0.0],
+				[101.0, 1.0],
+				[100.0, 1.0],
+				[100.0, 0.0]
+			];
 			var points = geom.map(function (pnt) {
 				return new Point(pnt[0], pnt[1]);
 			});
 			var polygon = new Polygon(points);
 
-			assert.ok(polygon.simple_polygon(), "polygon is simple")
+			assert.ok(!polygon.isSimplePolygon(), "polygon is simple")
 		});
 
 		it('test is polygon simple 2', function () {
-			var geom = [[2.0, 2.0], [1.0, 2.0], [1.0, 1.0], [2.0, 1.0], [3.0, 1.0], [3.0, 2.0], [2.000001, 2.000001]];
+			var geom = [
+				[2.0, 2.0],
+				[1.0, 2.0],
+				[1.0, 1.0],
+				[2.0, 1.0],
+				[3.0, 1.0],
+				[3.0, 2.0],
+				[2.00001, 2.000001]
+			];
 			var points = geom.map(function (pnt) {
 				return new Point(pnt[0], pnt[1]);
 			});
 			var polygon = new Polygon(points);
 
-			assert.ok(polygon.simple_polygon(), "polygon is simple")
+			assert.ok(polygon.isSimplePolygon(), "polygon is simple")
 		});
 
 		it('test is polygon simple 3', function () {
-			var geom = [[0, 0], [0, 1], [1, 1], [0, 1], [0.0001, 0.00001]];
+			var geom = [
+				[0, 0],
+				[0, 1],
+				[1, 1],
+				[1, 0],
+				[0.0001, 0.00001]
+			];
 			var points = geom.map(function (pnt) {
 				return new Point(pnt[0], pnt[1]);
 			});
 			var polygon = new Polygon(points);
 
-			assert.ok(polygon.simple_polygon(), "polygon is simple")
+			assert.ok(polygon.isSimplePolygon(), "polygon is simple")
 		});
 
 		it('test is polygon simple 4', function () {
-			var geom = [[2.0, 2.0], [2.0, 3.0], [3.0, 3.0], [4.0, 3.0], [4.0, 2.0], [2.000001, 2.00001]];
+			var geom = [
+				[2.0, 2.0],
+				[2.0, 3.0],
+				[3.0, 3.0],
+				[4.0, 3.0],
+				[4.0, 2.0],
+				[2.000001, 2.00001]
+			];
 			var points = geom.map(function (pnt) {
 				return new Point(pnt[0], pnt[1]);
 			});
 			var polygon = new Polygon(points);
 
-			assert.ok(polygon.simple_polygon(), "polygon is complex")
+			assert.ok(polygon.isSimplePolygon(), "polygon is simple")
+		});
+
+		it('test is polygon simple 5', function () {
+			var geom = [[116.305714, 40.061918], [116.300827, 40.056175], [116.303774, 40.048471], [116.30672, 40.041981], [116.31096, 40.046786], [116.313332, 40.049934], [116.315056, 40.053248], [116.315416, 40.055126], [116.315344, 40.057003], [116.314949, 40.058826], [116.311463, 40.062112], [116.305712, 40.061911]];
+			var points = geom.map(function (pnt) {
+				return new Point(pnt[0], pnt[1]);
+			});
+			var polygon = new Polygon(points);
+
+			assert.ok(polygon.isSimplePolygon(), "polygon is simple")
 		});
 
 
 		it('test is polygon complex 1', function () {
-			var geom = [[2.0, 2.0], [2.0, 3.0], [3.0, 1.0], [4.0, 3.0], [4.0, 2.0], [2.00001, 2.00001]];
+			var geom = [
+				[2.0, 2.0],
+				[2.0, 3.0],
+				[3.0, 1.0],
+				[4.0, 3.0],
+				[4.0, 2.0],
+				[2.00001, 2.00001]
+			];
 			var points = geom.map(function (pnt) {
 				return new Point(pnt[0], pnt[1]);
 			});
 			var polygon = new Polygon(points);
 
-			assert.ok(!polygon.simple_polygon(), "polygon is complex")
+			assert.ok(!polygon.isSimplePolygon(), "polygon is complex")
 		});
 
 
 		it('test is polygon complex 2', function () {
-			var geom = [[2.0, 2.0], [3.0, 2.0], [3.0, 3.0], [2.0, 3.0], [4.0, 2.0], [2.0000001, 2.000001]];
+			var geom = [
+				[2.0, 2.0],
+				[3.0, 2.0],
+				[3.0, 3.0],
+				[2.0, 3.0],
+				[4.0, 2.0],
+				[2.0000001, 2.000001]
+			];
 			var points = geom.map(function (pnt) {
 				return new Point(pnt[0], pnt[1]);
 			});
 			var polygon = new Polygon(points);
 
-			assert.ok(!polygon.simple_polygon(), "polygon is complex")
+			assert.ok(!polygon.isSimplePolygon(), "polygon is complex")
+		});
+
+		it('test is polygon complex 3', function () {
+			var geom = [[116.305714, 40.061918], [116.313008, 40.056175], [116.303774, 40.048471], [116.320554, 40.059433], [116.307403, 40.058771], [116.318578, 40.046317], [116.310565, 40.058356], [116.310062, 40.051205], [116.313368, 40.05808], [116.305714, 40.061918]];
+			var points = geom.map(function (pnt) {
+				return new Point(pnt[0], pnt[1]);
+			});
+			var polygon = new Polygon(points);
+
+			assert.ok(!polygon.isSimplePolygon(), "polygon is complex")
 		});
 	});
 	describe('red black tree', function () {
@@ -162,7 +234,7 @@ describe('sweepline', function () {
 			assert.equal(one.compare(two), -1);
 			assert.equal(two.compare(one), 1);
 			assert.equal(one.compare(one), 0);
-		})
+		});
 
 		it('test add multiple', function () {
 			var rbt = new RedBlackTree();
@@ -187,7 +259,7 @@ describe('sweepline', function () {
 			rbt.add(new TestNumber(5));
 			rbt.add(new TestNumber(10));
 			rbt.add(new TestNumber(6));
-			rbt.remove(new TestNumber(5))
+			rbt.remove(new TestNumber(5));
 
 			assert.equal(6, rbt.min().value, "root should now be 6");
 			assert.ok(!rbt.find(new TestNumber(5)));
@@ -247,7 +319,7 @@ describe('sweepline', function () {
 			rbt.add(new TestNumber(5));
 			rbt.add(new TestNumber(10));
 			rbt.add(new TestNumber(6));
-			min = rbt.min();
+			var min = rbt.min();
 			assert.deepEqual(new TestNumber(6), rbt.findNext(min), "Tree should be traversable.");
 		});
 
@@ -262,19 +334,27 @@ describe('sweepline', function () {
 	});
 	describe('sweepline', function () {
 		it('test can find', function () {
-			var geojson = [[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]];
+			var geojson = [
+				[100.0, 0.0],
+				[101.0, 0.0],
+				[101.0, 1.0],
+				[100.0, 1.0],
+				[100.0, 0.0]
+			];
 			var points = geojson.map(function (pnt) {
 				return new Point(pnt[0], pnt[1]);
 			});
 			var polygon = new Polygon(points);
 			var sweep_line = new SweepLine(polygon);
 			var event_queue = new EventQueue(polygon);
-
+			var ev;
 			while (ev = event_queue.events.pop()) {
 				sweep_line.add(ev);
 			}
 
-			assert.ok(sweep_line.find({edge: 1}));
+			assert.ok(sweep_line.find({
+				edge: 1
+			}));
 		});
 	});
 });
